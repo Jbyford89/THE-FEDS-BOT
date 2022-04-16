@@ -1,11 +1,10 @@
 from tkinter import HIDDEN
 from nextcord.ext import commands
 from .role_view import RoleView
-import config
 
 class ButtonRoles(commands.Cog, name="Board Roles"):
     """Creates buttons that assign roles (script-kiddie, Python, etc.) to users.
-    
+
     Must be used as Admin.
 
     This command is to bbe used in the designated roles channel. The role buttons will not disappear after being clicked.
