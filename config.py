@@ -7,7 +7,7 @@ load_dotenv()
 PREFIX = ">"
 BOT_NAME = "The Feds"
 BOT_TOKEN = os.getenv("DISCORD_TOKEN")
-OWNER_ID = int(os.getenv("OWNER_ID"))
+OWNER_ID = os.getenv("OWNER_ID")
 
 # Discord Guild ID
 GUILD_ID = int(os.getenv("GUILD_ID"))
