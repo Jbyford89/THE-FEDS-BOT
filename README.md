@@ -1,6 +1,6 @@
 # THE-FEDS-BOT
 
-[![Discord](https://img.shields.io/discord/939591202485981184?color=7289DA&logo=discord&logoColor=white)](https://discord.gg/U29yMsxXMd "ASU Cyber Bootcamp 21/22")
+[![Discord](https://img.shields.io/discord/939591202485981184?color=cf1020&logo=discord&logoColor=darkred)](https://discord.gg/U29yMsxXMd "ASU Cyber Bootcamp 21/22")
 [![Powered by Nextcord](https://custom-icon-badges.herokuapp.com/badge/-Powered%20by%20Nextcord-0d1620?logo=nextcord)](https://github.com/nextcord/nextcord "Powered by Nextcord Python API Wrapper")
 
 This bot is in a production state and is currently being updated with new features. "The-Feds" Bot is used within the ASU Bootcamp 21/22 Discord server.
