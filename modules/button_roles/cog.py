@@ -1,4 +1,3 @@
-from tkinter import HIDDEN
 from nextcord.ext import commands
 from .role_view import RoleView
 
