@@ -1,6 +1,6 @@
-from tkinter import HIDDEN
 from nextcord.ext import commands
 from .role_view import RoleView
+import config
 
 class ButtonRoles(commands.Cog, name="Board Roles"):
     """Creates buttons that assign roles (script-kiddie, Python, etc.) to users.
@@ -19,7 +19,7 @@ class ButtonRoles(commands.Cog, name="Board Roles"):
         self.bot.add_view(RoleView())
 
     @commands.command()
-    @commands.has_permissions(manage_roles=True)
+    @commands.has_permissions(administrator=True)
     async def roles(self, ctx: commands.Context):
         """Creates a new role view"""
         await ctx.send(f"Click a button to add or remove a role!", view=RoleView())

@@ -1,7 +1,55 @@
 import nextcord
-from nextcord.ext import commands
+from typing import Optional, Set
+from nextcord.ext import commands, menus
 from nextcord.embeds import EmptyEmbed
+from nextcord import Embed
 import config
+
+
+class HelpPageSource(menus.ListPageSource):
+    def __init__(self, help_command, data):
+        self._help_command = help_command
+        # you can set here how many items to display per page
+        super().__init__(data, per_page=2)
+
+    async def format_page(self, menu, entries):
+        """
+        Returns an embed containing the entries for the current page
+        """
+        prefix = self._help_command.context.clean_prefix
+        invoked_with = self._help_command.invoked_with
+        embed = nextcord.Embed(title="Bot Commands",
+                               colour=self._help_command.COLOUR)
+        embed.description = (
+            f'Use "{prefix}{invoked_with} command" for more info on a command.\n'
+            f'Use "{prefix}{invoked_with} category" for more info on a category.'
+        )
+        # add the entries to the embed
+        for entry in entries:
+            embed.add_field(name=entry[0], value=entry[1], inline=False)
+        # set the footer to display the page number
+        embed.set_footer(
+            text=f'Page {menu.current_page + 1}/{self.get_max_pages()}')
+        return embed
+
+
+class HelpButtonMenuPages(menus.ButtonMenuPages):
+
+    FIRST_PAGE = "<:pagefirst:899973860772962344>"
+    PREVIOUS_PAGE = "<:pageprev:899973860965888010>"
+    NEXT_PAGE = "<:pagenext:899973860840050728>"
+    LAST_PAGE = "<:pagelast:899973860810694686>"
+    STOP = "<:stop:899973861444042782>"
+
+    def __init__(self, ctx: commands.Context, **kwargs):
+        super().__init__(**kwargs)
+        self._ctx = ctx
+
+    async def interaction_check(self, interaction: nextcord.Interaction) -> bool:
+        """Ensure that the user of the button is the one who called the help command"""
+        return self._ctx.author == interaction.user
+
+       
 
 class MyHelpCommand(commands.MinimalHelpCommand):
     """Custom help command override using embeds."""
@@ -13,46 +61,59 @@ class MyHelpCommand(commands.MinimalHelpCommand):
         invoked_with = self.invoked_with
         return f'Use {config.PREFIX}{invoked_with} [command] for more info on a command.'
 
-    def get_command_signature(self, command):
+    def get_command_signature(self, command: commands.core.Command):
         """Returns the signature portion of the help command."""
-        return f"{command.qualified_name} {command.signature}"
+        return f"{self.context.clean_prefix}{command.qualified_name} {command.signature}"
 
     async def send_bot_help(self, mapping: dict):
         """"Implements bot command help page"""
-        embed = nextcord.Embed(title="Bot Commands", colour=self.COLOUR)
-        avatar = self.context.bot.user.avatar
-        avatar_url = avatar.url if avatar else EmptyEmbed
-        embed.set_author(name=self.context.bot.user.name, icon_url=avatar_url)
-        description = self.context.bot.description
-        if description:
-            embed.description = description
+        prefix = self.context.clean_prefix
+        invoked_with = self.invoked_with
+        embed = nextcord.Embed(title = "Bot Commands", colour=self.COLOUR)
+        embed.description = (
+            f"Use {prefix}{invoked_with} [command] for more info on a command.\n"
+            f"Use {prefix}{invoked_with} [category] for more info on a category."
+        )
+
+        embed_fields = []
 
         for cog, commands in mapping.items():
             name = "No Category" if cog is None else cog.qualified_name
             filtered = await self.filter_commands(commands, sort=True)
             if filtered:
-                # \u2002 = middle dot
-                value = "\u2002".join(f"{config.PREFIX}{c.name} {c.signature}" for c in filtered)
+                # \u2002 = en space
+                value = "\u2002".join(
+                    f"`{self.context.clean_prefix}{c.name}`" for c in filtered)
                 if cog and cog.description:
-                    value = f"{cog.description}\n\n{value}"
-                embed.add_field(name=name, value=value, inline=False)
+                    value = f"{cog.description}\n{value}"
+                # add (name, value) to embed_fields    
+                embed_fields.append((name, value))
+
+        # create a pagination menu that paginates through the embed_fields
+        pages = HelpButtonMenuPages(
+            ctx = self.context,
+            source = HelpPageSource(self, embed_fields),
+            disable_buttons_after = True,
+        )
+        await pages.start(self.context)
 
 
-        embed.set_footer(text=self.get_ending_note())
-        await self.get_destination().send(embed=embed)
 
     async def send_cog_help(self, cog: commands.Cog):
         """"Implements cog command help page"""
-        embed = nextcord.Embed(f"{cog.qualified_name} Commands", colour=self.COLOUR)
+        embed = nextcord.Embed(
+            f"{cog.qualified_name} Commands", colour=self.COLOUR
+        )
         if cog.description:
             embed.description = cog.description
 
-            filtered = await self.filter_commands(cog.get_commands(), sort=True)
-            for command in filtered:
-                embed.add_field(name=self.get_command_signature(command), 
-                    value=command.short_doc or "No help given", inline=False)
+        filtered = await self.filter_commands(cog.get_commands(), sort=True)
+        for command in filtered:
+            embed.add_field(name=self.get_command_signature(command), 
+                value=command.short_doc or "No help given", inline=True)
 
-        embed.set_footer(text=self.get_ending_note())
+        embed.set_footer(
+            text = f"Use {self.context.clean_prefix} [command] for more info on a command.")
         await self.get_destination().send(embed=embed)
 
     async def send_group_help(self, group: commands.Group):
@@ -64,10 +125,12 @@ class MyHelpCommand(commands.MinimalHelpCommand):
         if isinstance(group, commands.Group):
             filtered = await self.filter_commands(group.commands, sort=True)
             for command in filtered:
-                embed.add_field(name=self.get_command_signature(command),
-                    value=command.short_doc or "No help given", inline=False)
+                embed.add_field(
+                    name=self.get_command_signature(command),
+                    value=command.short_doc or "No help given", inline=True
+                )
 
-        embed.set_footer(text=self.get_ending_note())
+        # embed.set_footer(text=self.get_ending_note())
         await self.get_destination().send(embed=embed)
     
     # Use the same function as group help for command help
