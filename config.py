@@ -13,6 +13,8 @@ OWNER_ID = os.environ["OWNER_ID"]
 GUILD_ID = os.environ["GUILD_ID"]
 
 # Discord Channel IDs
+RULES_CHANNEL_ID = os.environ["RULES_CHANNEL_ID"]
+WELCOME_CHANNEL_ID = os.environ["WELCOME_CHANNEL_ID"]
 
 # Discord Role IDs
 SCRIPT_KIDDIE_ROLE_ID = os.environ["SCRIPT_KIDDIE_ROLE_ID"]
