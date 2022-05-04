@@ -20,13 +20,13 @@ def main():
 
 
     bot = commands.Bot(
-        command_prefix='>', 
+        command_prefix=config.PREFIX, 
         description='The Feds Bot',
         activity=activity,
         owner_id=config.OWNER_ID,
         intents=intents)
 
-    load_dotenv()
+    
 
     @bot.event
     async def on_ready():
