@@ -1,5 +1,6 @@
 import random
 from nextcord.ext import commands
+import asyncio
 
 
 class Random(commands.Cog, name="Random"):
@@ -42,6 +43,29 @@ class Random(commands.Cog, name="Random"):
         """
         choice = random.choice(["heads", "tails"])
         await ctx.send(f"👛 {ctx.author.mention} flipped a coin: {choice}")
+
+    @commands.command()
+    async def guess(self, ctx:commands.Context):
+        """Guess a number between 1 and 100.
+        
+        An example: >guess 50
+        """
+        await ctx.send('Guess a number between 1 and 100.')
+
+        def is_correct(m):
+            return m.author == ctx.author and m.content.isdigit()
+
+        answer = random.randint(1, 10)
+
+        try:
+            guess = await self.bot.wait_for('message', check=is_correct, timeout=5.0)
+        except asyncio.TimeoutError:
+            return await ctx.send(f'Sorry, you took too long it was {answer}.')
+
+        if int(guess.content) == answer:
+            await ctx.send('You are correct!')
+        else:
+            await ctx.send(f'Oops, it was {answer}.')
 
 
 def setup(bot):
