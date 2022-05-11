@@ -26,3 +26,6 @@ class WelcomeCog(commands.Cog, name="welcome"):
         )
         # Give the unassigned role to the new member.
         await member.add_roles(guild.get_role(config.UNASSIGNED_ROLE_ID))
+
+def setup(bot: commands.bot):
+    bot.add_cog(WelcomeCog(bot))
