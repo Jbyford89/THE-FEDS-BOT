@@ -2,6 +2,12 @@ import random
 from nextcord.ext import commands
 import asyncio
 
+def GetLinuxjokes():
+    with open("modules/fun/jokes_linux.txt", "r") as jokes:
+        linux_jokes = jokes.readlines()
+        linux_jokes = linux_jokes.split("\n")
+    return linux_jokes
+
 class Fun(commands.Cog, name="Fun"):
     def __init__(self, bot: commands.bot):
         self.bot = bot
@@ -39,24 +45,45 @@ class Fun(commands.Cog, name="Fun"):
         ]
         await ctx.send(f"🎱 {ctx.author.mention} asked: {question}\n🎱 {random.choice(responses)}")
 
-        @commands.command()
-        async def guess(ctx):
-            await ctx.send('Guess a number between 1 and 10.')
+    @_8ball.error
+    async def _8ball_error(self, ctx: commands.Context, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"{ctx.author.mention} Please ask a question.")
+        else:
+            raise error
 
-            def is_correct(m):
-                return m.author == ctx.author and m.content.isdigit()
 
-            answer = random.randint(1, 10)
 
-            try:
-                guess = await self.bot.wait_for('message', check=is_correct, timeout=5.0)
-            except asyncio.TimeoutError:
-                return await ctx.send('Sorry, you took too long it was {answer}.')
+    @commands.command()
+    async def guess(self, ctx: commands.Context):
+        await ctx.send('Guess a number between 1 and 10.')
 
-            if int(guess.content) == answer:
-                await ctx.send('You are correct!')
-            else:
-                await ctx.send(f'Oops, it was {answer}.')
+        def is_correct(m):
+            return m.author == ctx.author and m.content.isdigit()
+
+        answer = random.randint(1, 10)
+
+        try:
+            guess = await self.bot.wait_for('message', check=is_correct, timeout=5.0)
+        except asyncio.TimeoutError:
+            return await ctx.send('Sorry, you took too long it was {answer}.')
+
+        if int(guess.content) == answer:
+            await ctx.send('You are correct!')
+        else:
+            await ctx.send(f'Oops, it was {answer}.')
+
+
+    @commands.command(name='linuxjoke', description='Get a random joke from the Linux Joke Database', aliases=['lj'])
+    async def linuxjokes(self, ctx: commands.Context):
+        """
+        Get a random Linux joke.
+        """
+        joke = random.choice(self.linux_jokes)
+        joke = joke.split(":")
+        await ctx.send(f"```{joke[0].strip()}\n{joke[1].strip()}```")
+
+    
 
 def setup(bot):
     bot.add_cog(Fun(bot))
