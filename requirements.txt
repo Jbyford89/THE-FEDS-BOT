@@ -13,6 +13,6 @@ pycodestyle==2.8.0
 python-config==0.1.2
 python-dotenv==0.20.0
 toml==0.10.2
-typing_extensions==4.2.0
+typing_extensions==4.5.0
 yarl==1.7.2
 nextcord-ext-menus==1.5.2
